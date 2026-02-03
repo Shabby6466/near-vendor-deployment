@@ -47,7 +47,7 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_DATABASE=${DB_DATABASE}
       - DB_SYNC=${DB_SYNC}
-
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
       - REDIS_DB=${REDIS_DB:-0}
       - REDIS_HOST=redis
       - REDIS_PORT=6379

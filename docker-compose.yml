@@ -12,7 +12,7 @@ services:
       - POSTGRES_USER=${DB_USERNAME}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -53,6 +53,8 @@ services:
       - APP_PORT=3836
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRES_IN=24h
+      - SUPERADMIN_PHONE=${SUPERADMIN_PHONE}
+      - SUPERADMIN_PASSWORD=${SUPERADMIN_PASSWORD}
     ports:
       - "3836:3836"
     networks:
@@ -86,7 +88,7 @@ services:
       - backend
     networks:
       - nearvendor_network
-      
+
   certbot:
     image: certbot/certbot:v2.10.0
     container_name: nearvendor_certbot

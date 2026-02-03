@@ -13,14 +13,19 @@ if [ -z "$DOMAIN" ] || [ -z "$CERT_EMAIL" ]; then
 fi
 
 echo "### Initializing SSL certificates for $DOMAIN ###"
+# Get the first domain in the list to use as the directory name
+PRIMARY_DOMAIN=$(echo $DOMAIN | awk '{print $1}')
+
+echo "### Initializing SSL certificates for: $DOMAIN ###"
+echo "### Primary directory name: $PRIMARY_DOMAIN ###"
 
 # Create dummy certificate to start Nginx
 echo "--> Creating dummy certificate..."
-mkdir -p ./certbot_conf/live/$DOMAIN
+mkdir -p ./certbot_conf/live/$PRIMARY_DOMAIN
 docker compose run --rm --entrypoint "\
   openssl req -x509 -nodes -newkey rsa:4096 -days 1\
-    -keyout '/etc/letsencrypt/live/$DOMAIN/privkey.pem' \
-    -out '/etc/letsencrypt/live/$DOMAIN/fullchain.pem' \
+    -keyout '/etc/letsencrypt/live/$PRIMARY_DOMAIN/privkey.pem' \
+    -out '/etc/letsencrypt/live/$PRIMARY_DOMAIN/fullchain.pem' \
     -subj '/CN=localhost'" certbot
 
 # Download recommended SSL parameters
@@ -36,13 +41,19 @@ docker compose up -d nginx
 # Request real certificate
 echo "--> Deleting dummy certificate and requesting real one..."
 docker compose run --rm --entrypoint "\
-  rm -Rf /etc/letsencrypt/live/$DOMAIN && \
-  rm -Rf /etc/letsencrypt/archive/$DOMAIN && \
-  rm -Rf /etc/letsencrypt/renewal/$DOMAIN.conf" certbot
+  rm -Rf /etc/letsencrypt/live/$PRIMARY_DOMAIN && \
+  rm -Rf /etc/letsencrypt/archive/$PRIMARY_DOMAIN && \
+  rm -Rf /etc/letsencrypt/renewal/$PRIMARY_DOMAIN.conf" certbot
+
+# Build the domain arguments dynamically (-d domain1.com -d www.domain1.com)
+domain_args=""
+for d in $DOMAIN; do
+  domain_args="$domain_args -d $d"
+done
 
 cert_command="certbot certonly --webroot -w /var/www/certbot \
   --email $CERT_EMAIL \
-  -d $DOMAIN \
+  $domain_args \
   --rsa-key-size 4096 \
   --agree-tos \
   --force-renewal \

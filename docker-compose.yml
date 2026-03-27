@@ -57,20 +57,12 @@ services:
       - JWT_EXPIRES_IN=24h
       - SUPERADMIN_PHONE=${SUPERADMIN_PHONE}
       - SUPERADMIN_PASSWORD=${SUPERADMIN_PASSWORD}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - CLOUDINARY_FOLDER=${CLOUDINARY_FOLDER}
     ports:
       - "3836:3836"
-    networks:
-      - nearvendor_network
-
-  frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
-    container_name: nearvendor_frontend
-    restart: unless-stopped
-    environment:
-      - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=https://nearvendor.pro/api
     networks:
       - nearvendor_network
 
@@ -86,7 +78,6 @@ services:
       - ./certbot_www:/var/www/certbot:ro
       - ./certbot_conf:/etc/letsencrypt:ro
     depends_on:
-      - frontend
       - backend
     networks:
       - nearvendor_network
